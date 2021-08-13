@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+</head>
+
+<body onload="authenticate()">
+    <!-- <h1>
+        FLEX Player POC
+    </h1> -->
+    <h3 id="showMessage"></h3>
+    <div style="visibility:hidden;">
+        <video id="video-player" data-account="6057949464001" data-player="s2ZHtIoZ0" data-embed="default" controls=""
+            data-application-id="" class="video-js" controls height="576" width="1024"></video>
+    </div>
+
+    <!-- Script Here -->
+    <script src="https://players.brightcove.net/6057949464001
+/s2ZHtIoZ0_default/index.min.js"></script>
+    <script type="text/javascript">
+        authenticate = () => {
+            const queryString = window.location.search;
+            const urlParams = new URLSearchParams(queryString);
+
+            var access_token = urlParams.get('token');
+            //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyODI4MTciLCJqdGkiOiIyYTdmY2U5ZS1jMjlmLTQwMzMtODM3NS03MTQ3ZmQyMmQ2ZjUiLCJpYXQiOiIxNjI4ODg5Mzc5LjU3NDgxIiwiWm9uZUFQSUF1dGhJZCI6IjI4MjgxNyIsIkVtYWlsIjoiaXRzYXRpZnNpZGRpcXVpQGdtYWlsLmNvbSIsIlVzcklkIjoiMTMzODU3NjgiLCJuYmYiOjE2Mjg4ODkzNzksImV4cCI6MTYyODg5Mjk3OSwiaXNzIjoiaHR0cHM6Ly9hcGkuZm9kMjQ3LmlvIn0.AbFc3fFT2GkjVbNyuoRU_TA3ipiB_ZWYzhSa0qJpNoc";
+            var kVideoTitle = urlParams.get('title');
+            var kVideoId = urlParams.get('id')
+            console.log(access_token);
+            console.log(kVideoTitle);
+            console.log(kVideoId);
+            var eventHistoryId = "";
+            var myPlayer;
+            var previewPlayer;
+            var isBillablePlay = true;
+            var isPlayInitiated = false;
+            var playProgress25 = false;
+            var playProgress50 = false;
+            var playProgress75 = false;
+            var data = new FormData();
+            // Basic HTML / JS Brightcove player example
+
+            $('#showMessage').html('Authentication in progress.');
+
+            // let settings = {
+            //     "url": "https://api.fod247.io/flex/v1/auth/token",
+            //     "method": "POST",
+            //     "data": JSON.stringify({
+            //         "email": "info@botthms.com",
+            //         "clientId": "c3f94489-40b0-4e5f-8045-62a31f817e2b",
+            //         "clientSecret": "2a9d6699-9f20-42a5-9e38-b94e446f0c83"
+            //     }),
+            //     "contentType": "application/json-patch+json"
+            // }
+
+            // $.ajax(settings).done(function (response) {
+            //     //set access token to call other apis
+            //     access_token = response.idToken;
+            //     if (access_token) {
+
+                    // $('#showMessage').html('Authentication done.');
+            //     }
+            //     getAllVideos();
+            // });
+            // getAllVideos = () => {
+            //     setTimeout(() => {
+                    // $('#showMessage').html('Retrieving Videos list for your account.');
+            //     }, 500)
+
+
+            //     let settings = {
+            //         "async": true,
+            //         "crossDomain": true,
+            //         "url": "https://api.fod247.io/flex/v1/classes/list",
+            //         "method": "GET",
+            //         "headers": {
+            //             "Authorization": `Bearer ${access_token}`,
+            //             "cache-control": "no-cache"
+            //         }
+            //     }
+
+            //     $.ajax(settings).done(function (response) {
+                    // $('#video-player').css('visibility', 'visible');
+            //         // Play first video of the list
+            //         let videos = shuffle(response);
+            //         videoTitle = kVideoTitle;
+                    
+
+            //     });
+            // }
+
+             
+
+
+            $('#showMessage').html('Authentication done.');
+            $('#showMessage').html('Retrieving Videos list for your account.');
+            $('#video-player').css('visibility', 'visible');
+
+            // let shuffle = (array) => {
+            //     let currentIndex = array.length;
+            //     let temporaryValue, randomIndex;
+            //     // While there remain elements to shuffle...
+            //     while (0 !== currentIndex) {
+            //         // Pick a remaining element...
+            //         randomIndex = Math.floor(Math.random() * currentIndex);
+            //         currentIndex -= 1;
+            //         // And swap it with the current element.
+            //         temporaryValue = array[currentIndex];
+            //         array[currentIndex] = array[randomIndex];
+            //         array[randomIndex] = temporaryValue;
+            //     }
+            //     return array;
+            // };
+            // Initialize player
+            videojs.getPlayer('video-player').ready(function () {
+                myPlayer = this;
+                myPlayer.play();
+                // Playback error Following are standard errors
+                // MEDIA_ERR_ABORTED , MEDIA_ERR_NETWORK , MEDIA_ERR_DECODE,
+                // MEDIA_ERR_SRC_NOT_SUPPORTED, MEDIA_ERR_ENCRYPTED, MEDIA_ERR_UNKNOWN
+                // Reference - https://player.support.brightcove.com
+                // / references / brightcove - player - error - reference.html
+                myPlayer.on("error", function (err) {
+                    // myPlayer.error() will return a JSON object and return
+                    // type and code
+
+                    let errType = myPlayer.error().type;
+                    playerErrorLog(errType)
+                });
+
+                // Play event
+                myPlayer.on('play', function () {
+                    if (!isPlayInitiated) {
+                        isPlayInitiated = true;
+
+                        let elapsedTime = myPlayer.currentTime();
+                        let duration = myPlayer.duration();
+                        console.log('elapsedTime', elapsedTime)
+                        console.log('duration', duration)
+                        const new_date = new Date();
+                        console.log(new_date.toISOString());
+                        let settings = {
+                            "url": "https://api.fod247.io/flex/v1/classes/play",
+                            "method": "POST",
+                            "data": JSON.stringify({
+                                "videoId": kVideoId,
+                                "startTime": new_date.toISOString() //"2020-12-14T07:19: 52.928Z",
+                            }),
+                            "contentType": "application/json-patch+json",
+                            "headers": {
+                                "Authorization": `Bearer ${access_token}`,
+                                "cache-control": "no-cache"
+                            }
+                        }
+
+                        $.ajax(settings).done(function (response) {
+
+                            //$('#showMessage').html('Playback log api called.');
+
+                            console.log('play res data', response)
+                            eventHistoryId = response.data.eventHistoryId;
+                            console.log('eventHistoryId', eventHistoryId)
+
+                        });
+
+                    }
+                })
+
+                // Playback Ended
+                myPlayer.on('ended', function () {
+
+                    let elapsedTime = myPlayer.currentTime();
+                    const new_date = new Date();
+                    console.log(new_date.toISOString());
+                    // expected output: 2011-10-05T14:48:00.000Z
+                    let settings = {
+                        "url": "https://api.fod247.io/flex/v1/classes/endevent",
+                        "method": "POST",
+                        "data": JSON.stringify({
+                            "eventHistoryId": eventHistoryId,
+                            "endTime": new_date.toISOString(), //"2020-12-14T07:19: 52.928Z",
+                            "stopReason": "Ended",
+                            "lastSeekTimeInMs": parseInt(elapsedTime) * 1000
+
+                        }),
+                        "contentType": "application/json-patch+json",
+                        "headers": {
+                            "Authorization": `Bearer ${access_token}`,
+                            "cache-control": "no-cache"
+                        }
+                    }
+
+                    $.ajax(settings).done(function (response) {
+
+                        console.log("end response", response);
+                        //$('#showMessage').html('endEvent log api called.');
+                        playProgress25 = false;
+                        playProgress50 = false;
+                        playProgress75 = false;
+                        eventHistoryId = null;
+                        isPlayInitiated = false;
+
+
+                    });
+
+                })
+                myPlayer.on("seeked", event => {
+                    elapsedTime = myPlayer.currentTime();
+                    if (eventHistoryId !== null && elapsedTime > 0) {
+                        capturePlayProgressEvent(elapsedTime);
+                    }
+                });
+
+                myPlayer.on("timeupdate", function () {
+
+                    let elapsedTime = myPlayer.currentTime();
+                    let totalLength = myPlayer.duration();
+                    let coveredProgress = (elapsedTime * 100) / totalLength;
+                    console.log('coveredProgress', coveredProgress)
+                    switch (parseInt(coveredProgress)) {
+                        case 25:
+                            if (!playProgress25) {
+                                playProgress25 = true;
+                                capturePlayProgressEvent(elapsedTime);
+                            }
+                            break;
+                        case 50:
+                            if (!playProgress50) {
+                                playProgress50 = true;
+                                capturePlayProgressEvent(elapsedTime);
+                            }
+                            break;
+                        case 75:
+                            if (!playProgress75) {
+                                playProgress75 = true;
+                                capturePlayProgressEvent(elapsedTime);
+                            }
+                            break;
+                    }
+
+
+
+                })
+
+                 // launch player for full Video
+             let launchPlayer = (videoId) => {
+                myPlayer.catalog.getVideo(`ref:${videoId}`, function (error,
+                    video) {
+                    // Capture video load error
+                    if (error != null) {
+                        playerErrorLog('Could not find video')
+                    }
+                    // Load the video object into the player
+                    myPlayer.catalog.load(video);
+                    $('#showMessage').html('Video is ready for theplayback.');
+                    myPlayer.play();
+                });
+            }
+            launchPlayer(kVideoId);
+            });
+            function capturePlayProgressEvent(elapsedTime) {
+
+                let settings = {
+                    "url": "https://api.fod247.io/flex/v1/classes/playprogress",
+                    "method": "POST",
+                    "data": JSON.stringify({
+                        "eventHistoryId": eventHistoryId,
+                        "lastSeekTimeInMs": parseInt(elapsedTime) * 1000,
+                        "playProgress25": playProgress25,
+                        "playProgress50": playProgress50,
+                        "playProgress75": playProgress75,
+
+                    }),
+                    "contentType": "application/json-patch+json",
+                    "headers": {
+                        "Authorization": `Bearer ${access_token}`,
+                        "cache-control": "no-cache"
+                    }
+                }
+                $.ajax(settings).done(function (response) {
+
+                    //$('#showMessage').html('Playprogress log api called.');
+
+                    console.log("response", response);
+
+                });
+            }
+
+            
+
+          
+        }
+    </script>
+</body>
+
+</html>
