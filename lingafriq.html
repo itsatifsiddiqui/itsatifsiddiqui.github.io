@@ -22,11 +22,11 @@
 
         $(document).ready(function () {
             // theVid will be populated by query string, for testing it's hard coded.
-            //var theVid = 'http://html5demos.com/assets/dizzy.mp4';
+            var theVid = 'http://html5demos.com/assets/dizzy.mp4';
             
-            const queryString = window.location.search;
-            const urlParams = new URLSearchParams(queryString);
-            var theVid = urlParams.get('video') 
+            //const queryString = window.location.search;
+            //const urlParams = new URLSearchParams(queryString);
+            //var theVid = urlParams.get('video') 
             // 'http://techslides.com/demos/sample-videos/small.mp4';
 
             var player = document.getElementById('videoPlayer');
